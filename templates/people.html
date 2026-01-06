@@ -1,0 +1,158 @@
+{% extends "layout.html" %}
+
+{% block title %}People - CS50 Final Project{% endblock %}
+
+{% block head %}
+<style>
+    .people-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 2rem;
+    }
+
+    .people-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .people-header h1 {
+        font-size: 2rem;
+        font-weight: 600;
+        color: #1c1c1c;
+        margin-bottom: 0.5rem;
+    }
+
+    .people-header p {
+        color: #666;
+    }
+
+    .users-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .users-table thead {
+        background: #8eaed6;
+        color: white;
+    }
+
+    .users-table th {
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .users-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #e0e0e0;
+        color: #1c1c1c;
+    }
+
+    .users-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .users-table tbody tr:hover {
+        background: #f8f9fa;
+    }
+
+    .role-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .role-badge.admin {
+        background: #e3f2fd;
+        color: #1976d2;
+    }
+
+    .role-badge.patient {
+        background: #f3e5f5;
+        color: #7b1fa2;
+    }
+
+    .no-users {
+        text-align: center;
+        padding: 3rem;
+        color: #666;
+    }
+
+    .view-reports-btn {
+        background: #8eaed6;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: background 0.2s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .view-reports-btn:hover {
+        background: #7a9bc4;
+    }
+
+    .view-reports-btn:active {
+        background: #6a8bb4;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="people-container">
+    <div class="people-header">
+        <h1>People</h1>
+        <p>View all registered users</p>
+    </div>
+
+    {% if users %}
+    <table class="users-table">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Name</th>
+                <th>Username</th>
+                <th>Role</th>
+                <th>Date of Birth</th>
+                <th>Gender</th>
+                <th>Joined</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>
+                    <a href="{{ url_for('reports_page', view_user_id=user.id) }}" class="view-reports-btn">View Reports</a>
+                </td>
+                <td>{{ user.name or 'N/A' }}</td>
+                <td>{{ user.username }}</td>
+                <td>
+                    <span class="role-badge {{ user.role }}">{{ user.role }}</span>
+                </td>
+                <td>{{ user.date_of_birth or 'N/A' }}</td>
+                <td>{{ user.gender|capitalize if user.gender else 'N/A' }}</td>
+                <td>{{ user.created_at[:10] if user.created_at else 'N/A' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="no-users">
+        <p>No users found.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+

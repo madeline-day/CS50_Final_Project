@@ -1,0 +1,214 @@
+{% extends "layout.html" %}
+
+{% block title %}Profile - CS50 Final Project{% endblock %}
+
+{% block head %}
+<style>
+    .profile-container {
+        max-width: 600px;
+        margin: 2rem auto;
+        padding: 2rem;
+    }
+
+    .profile-card {
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1.5rem;
+    }
+
+    .profile-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 2px solid #f0f0f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+
+    .profile-title {
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: #1c1c1c;
+        margin: 0 0 0.5rem 0;
+    }
+
+    .edit-profile-button {
+        padding: 0.625rem 1.25rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #ffffff;
+        background: #4a6fa5;
+        border: none;
+        border-radius: 6px;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background-color 0.2s ease, transform 0.1s ease;
+        display: inline-block;
+    }
+
+    .edit-profile-button:hover {
+        background: #3d5a8a;
+    }
+
+    .edit-profile-button:active {
+        transform: scale(0.98);
+    }
+
+    .profile-subtitle {
+        font-size: 0.95rem;
+        color: #666;
+        margin: 0;
+    }
+
+    .profile-field {
+        margin-bottom: 1.5rem;
+    }
+
+    .profile-label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #666;
+        margin-bottom: 0.5rem;
+        display: block;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .profile-value {
+        font-size: 1.1rem;
+        color: #1c1c1c;
+        padding: 0.75rem;
+        background: #f8f8f8;
+        border-radius: 6px;
+    }
+
+    .password-masked {
+        font-family: monospace;
+        letter-spacing: 0.2em;
+    }
+
+    .group-section {
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 2px solid #f0f0f0;
+    }
+
+    .group-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #1c1c1c;
+        margin-bottom: 1rem;
+    }
+
+    .member-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .member-item {
+        padding: 0.75rem 1rem;
+        background: #f8f8f8;
+        border-radius: 6px;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .member-name {
+        font-weight: 500;
+        color: #1c1c1c;
+    }
+
+    .member-username {
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .no-members {
+        color: #666;
+        font-style: italic;
+        padding: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="profile-container">
+    <div class="profile-card">
+        <div class="profile-header">
+            <div>
+                <h1 class="profile-title">Profile</h1>
+                <p class="profile-subtitle">Your account information</p>
+            </div>
+            <a href="{{ url_for('edit_profile') }}" class="edit-profile-button">Edit Profile</a>
+        </div>
+
+        <div class="profile-field">
+            <span class="profile-label">Name</span>
+            <div class="profile-value">{{ user.name or user.username }}</div>
+        </div>
+
+        <div class="profile-field">
+            <span class="profile-label">Username</span>
+            <div class="profile-value">{{ user.username }}</div>
+        </div>
+
+        <div class="profile-field">
+            <span class="profile-label">Date of Birth</span>
+            <div class="profile-value">{{ user.date_of_birth }}</div>
+        </div>
+
+        <div class="profile-field">
+            <span class="profile-label">Gender</span>
+            <div class="profile-value">{{ user.gender|capitalize }}</div>
+        </div>
+
+        <div class="profile-field">
+            <span class="profile-label">Password</span>
+            <div class="profile-value password-masked">••••••••</div>
+        </div>
+
+        {% if user.role == 'admin' and user.admin_group %}
+        <div class="profile-field">
+            <span class="profile-label">Group</span>
+            <div class="profile-value">Group: {{ user.admin_group }}</div>
+        </div>
+        {% elif user.role == 'patient' and user.patient_group %}
+        <div class="profile-field">
+            <span class="profile-label">Group</span>
+            <div class="profile-value">Group: {{ user.patient_group }}</div>
+        </div>
+        {% endif %}
+
+        {% if user.role == 'admin' and user.admin_group %}
+        <div class="group-section">
+            <h2 class="group-title">Group Members</h2>
+            {% if group_members %}
+            <ul class="member-list">
+                {% for member in group_members %}
+                <li class="member-item">
+                    <span class="member-name">{{ member.name or member.username }}</span>
+                    <span class="member-username">(@{{ member.username }})</span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <div class="no-members">No members in this group yet.</div>
+            {% endif %}
+        </div>
+        {% elif user.role == 'patient' and user.patient_group and group_admin %}
+        <div class="group-section">
+            <h2 class="group-title">Group Admin</h2>
+            <div class="member-item">
+                <span class="member-name">{{ group_admin.name or group_admin.username }}</span>
+                <span class="member-username">(@{{ group_admin.username }})</span>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

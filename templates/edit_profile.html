@@ -1,0 +1,212 @@
+{% extends "layout.html" %}
+
+{% block title %}Edit Profile - CS50 Final Project{% endblock %}
+
+{% block head %}
+<style>
+    .edit-profile-container {
+        max-width: 600px;
+        margin: 2rem auto;
+        padding: 2rem;
+    }
+
+    .edit-profile-card {
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .edit-profile-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .edit-profile-title {
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: #1c1c1c;
+        margin: 0 0 0.5rem 0;
+    }
+
+    .edit-profile-subtitle {
+        font-size: 0.95rem;
+        color: #666;
+        margin: 0;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #1c1c1c;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background: #ffffff;
+        color: #1c1c1c;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        box-sizing: border-box;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: #8eaed6;
+        box-shadow: 0 0 0 3px rgba(142, 174, 214, 0.1);
+    }
+
+    .form-help {
+        font-size: 0.85rem;
+        color: #666;
+        margin-top: 0.5rem;
+    }
+
+    .button-group {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .save-button {
+        flex: 1;
+        padding: 0.875rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #ffffff;
+        background: #4a6fa5;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.2s ease, transform 0.1s ease;
+    }
+
+    .save-button:hover {
+        background: #3d5a8a;
+    }
+
+    .save-button:active {
+        transform: scale(0.98);
+    }
+
+    .cancel-button {
+        flex: 1;
+        padding: 0.875rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #1c1c1c;
+        background: #f0f0f0;
+        border: none;
+        border-radius: 8px;
+        text-decoration: none;
+        text-align: center;
+        cursor: pointer;
+        transition: background-color 0.2s ease, transform 0.1s ease;
+        display: inline-block;
+    }
+
+    .cancel-button:hover {
+        background: #e0e0e0;
+    }
+
+    .error-message {
+        color: #d32f2f;
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+        padding: 0.75rem;
+        background: #ffebee;
+        border-radius: 4px;
+        display: none;
+    }
+
+    .error-message.show {
+        display: block;
+    }
+
+    .read-only-field {
+        background: #f8f8f8;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        color: #666;
+        font-size: 1rem;
+        border: 1px solid #e0e0e0;
+    }
+
+    .read-only-note {
+        font-size: 0.85rem;
+        color: #999;
+        margin-top: 0.5rem;
+        font-style: italic;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="edit-profile-container">
+    <div class="edit-profile-card">
+        <div class="edit-profile-header">
+            <h1 class="edit-profile-title">Edit Profile</h1>
+            <p class="edit-profile-subtitle">Update your account information</p>
+        </div>
+
+        {% if error %}
+        <div class="error-message show">{{ error }}</div>
+        {% else %}
+        <div class="error-message" id="errorMessage"></div>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('edit_profile') }}">
+            <div class="form-group">
+                <label for="name" class="form-label">Name</label>
+                <input type="text" id="name" name="name" class="form-input" 
+                       value="{{ user.name or '' }}" placeholder="Enter your full name">
+                <div class="form-help">Leave blank to keep current name</div>
+            </div>
+
+            <div class="form-group">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" id="username" name="username" class="form-input" 
+                       value="{{ user.username }}" required>
+                <div class="form-help">Your username must be unique</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Date of Birth</label>
+                <div class="read-only-field">{{ user.date_of_birth }}</div>
+                <div class="read-only-note">Date of birth cannot be changed after signup</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Gender</label>
+                <div class="read-only-field">{{ user.gender|capitalize }}</div>
+                <div class="read-only-note">Gender cannot be changed after signup</div>
+            </div>
+
+            <div class="form-group">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" id="password" name="password" class="form-input" 
+                       placeholder="Enter new password">
+                <div class="form-help">Leave blank to keep current password</div>
+            </div>
+
+            <div class="button-group">
+                <button type="submit" class="save-button">Save Changes</button>
+                <a href="{{ url_for('account_page') }}" class="cancel-button">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

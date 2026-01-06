@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - CS50 Final Project</title>
+    <style>
+        :root {
+            font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+            background-color: #ffffff;
+            color: #1c1c1c;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .login-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            background: #ffffff;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 420px;
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 2.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .login-logo {
+            height: 64px;
+            width: auto;
+            margin-bottom: 1rem;
+        }
+
+        .login-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: #1c1c1c;
+            margin: 0 0 0.5rem 0;
+        }
+
+        .login-subtitle {
+            font-size: 0.95rem;
+            color: #666;
+            margin: 0;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #1c1c1c;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #ffffff;
+            color: #1c1c1c;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #8eaed6;
+            box-shadow: 0 0 0 3px rgba(142, 174, 214, 0.1);
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 0.875rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #ffffff;
+            background: #8eaed6;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+
+        .login-button:hover {
+            background: #7a9bc4;
+        }
+
+        .login-button:active {
+            transform: scale(0.98);
+        }
+
+        .form-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .form-footer a {
+            color: #8eaed6;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .form-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            color: #d32f2f;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            background: #ffebee;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        @media (max-width: 640px) {
+            .login-container {
+                padding: 1rem;
+            }
+
+            .login-card {
+                padding: 2rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="PediaReach logo" class="login-logo">
+                <h1 class="login-title">Welcome Back</h1>
+                <p class="login-subtitle">Sign in to your account</p>
+            </div>
+            <form method="POST" action="{{ url_for('login') }}">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="error-message show">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                <div class="form-group">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" id="username" name="username" class="form-input" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" id="password" name="password" class="form-input" required autocomplete="current-password">
+                </div>
+                <button type="submit" class="login-button">Sign In</button>
+            </form>
+            <div class="form-footer">
+                <p>Don't have an account? <a href="{{ url_for('signup') }}">Sign up</a></p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

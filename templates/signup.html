@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - CS50 Final Project</title>
+    <style>
+        :root {
+            font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+            background-color: #ffffff;
+            color: #1c1c1c;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .signup-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            background: #ffffff;
+        }
+
+        .signup-card {
+            width: 100%;
+            max-width: 420px;
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 2.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .signup-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .signup-logo {
+            height: 64px;
+            width: auto;
+            margin-bottom: 1rem;
+        }
+
+        .signup-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: #1c1c1c;
+            margin: 0 0 0.5rem 0;
+        }
+
+        .signup-subtitle {
+            font-size: 0.95rem;
+            color: #666;
+            margin: 0;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #1c1c1c;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #ffffff;
+            color: #1c1c1c;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #8eaed6;
+            box-shadow: 0 0 0 3px rgba(142, 174, 214, 0.1);
+        }
+
+        /* Style calendar icon for date input */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+            opacity: 1;
+            filter: brightness(0);
+            width: 20px;
+            height: 20px;
+            padding: 0;
+            margin: 0;
+        }
+
+        /* Firefox support */
+        input[type="date"]::-moz-calendar-picker-indicator {
+            cursor: pointer;
+            opacity: 1;
+            filter: brightness(0);
+            width: 20px;
+            height: 20px;
+        }
+
+        .role-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .role-button {
+            flex: 1;
+            padding: 0.875rem 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #ffffff;
+            background: #8eaed6;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+
+        .role-button:hover {
+            background: #7a9bc4;
+        }
+
+        .role-button:active {
+            transform: scale(0.98);
+        }
+
+        .role-button.selected {
+            background: #4a6fa5;
+        }
+
+        .group-input-container {
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .group-input-container.show {
+            display: block;
+        }
+
+        .signup-button {
+            width: 100%;
+            padding: 0.875rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #ffffff;
+            background: #8eaed6;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+
+        .signup-button:hover {
+            background: #7a9bc4;
+        }
+
+        .signup-button:active {
+            transform: scale(0.98);
+        }
+
+        .form-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .form-footer a {
+            color: #8eaed6;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .form-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            color: #d32f2f;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        @media (max-width: 640px) {
+            .signup-container {
+                padding: 1rem;
+            }
+
+            .signup-card {
+                padding: 2rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="signup-container">
+        <div class="signup-card">
+            <div class="signup-header">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="PediaReach logo" class="signup-logo">
+                <h1 class="signup-title">Create Account</h1>
+                <p class="signup-subtitle">Sign up to get started</p>
+            </div>
+            <form method="POST" action="{{ url_for('signup') }}" id="signupForm">
+                <div class="form-group">
+                    <label for="first_name" class="form-label">First Name</label>
+                    <input type="text" id="first_name" name="first_name" class="form-input" required autocomplete="given-name">
+                </div>
+                <div class="form-group">
+                    <label for="last_name" class="form-label">Last Name</label>
+                    <input type="text" id="last_name" name="last_name" class="form-input" required autocomplete="family-name">
+                </div>
+                <div class="form-group">
+                    <label for="date_of_birth" class="form-label">Date of Birth</label>
+                    <input type="date" id="date_of_birth" name="date_of_birth" class="form-input" required>
+                    <div class="form-help" style="font-size: 0.85rem; color: #666; margin-top: 0.5rem;">
+                        Note: You will not be able to edit your date of birth after signing up.
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="gender" class="form-label">Gender</label>
+                    <div style="display: flex; gap: 1rem;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                            <input type="radio" id="gender_male" name="gender" value="male" required>
+                            <span>Male</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                            <input type="radio" id="gender_female" name="gender" value="female" required>
+                            <span>Female</span>
+                        </label>
+                    </div>
+                    <div class="form-help" style="font-size: 0.85rem; color: #666; margin-top: 0.5rem;">
+                        Note: You will not be able to edit this after signing up.
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" id="username" name="username" class="form-input" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" id="password" name="password" class="form-input" required autocomplete="new-password">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">I am a:</label>
+                    <div class="role-buttons">
+                        <button type="button" class="role-button" data-role="admin">Admin</button>
+                        <button type="button" class="role-button" data-role="patient">Patient</button>
+                    </div>
+                    <input type="hidden" id="role" name="role" required>
+                </div>
+                <div class="form-group">
+                    <div class="group-input-container" id="adminGroupContainer">
+                        <label for="admin_group" class="form-label">Group Name (Required)</label>
+                        <input type="text" id="admin_group" name="admin_group" class="form-input" placeholder="group you are admin of">
+                    </div>
+                    <div class="group-input-container" id="patientGroupContainer">
+                        <label for="patient_group" class="form-label">Admin Group Name (Optional)</label>
+                        <input type="text" id="patient_group" name="patient_group" class="form-input" placeholder="admin group you are part of">
+                    </div>
+                </div>
+                {% if error %}
+                <div class="error-message show">{{ error }}</div>
+                {% else %}
+                <div class="error-message" id="errorMessage"></div>
+                {% endif %}
+                <button type="submit" class="signup-button">Sign Up</button>
+            </form>
+            <div class="form-footer">
+                <p>Already have an account? <a href="{{ url_for('login') }}">Sign in</a></p>
+            </div>
+        </div>
+    </div>
+    <script>
+        const roleButtons = document.querySelectorAll('.role-button');
+        const roleInput = document.getElementById('role');
+        const adminGroupContainer = document.getElementById('adminGroupContainer');
+        const patientGroupContainer = document.getElementById('patientGroupContainer');
+        const adminGroupInput = document.getElementById('admin_group');
+        const patientGroupInput = document.getElementById('patient_group');
+        const signupForm = document.getElementById('signupForm');
+        const errorMessage = document.getElementById('errorMessage');
+
+        roleButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove selected class from all buttons
+                roleButtons.forEach(btn => btn.classList.remove('selected'));
+                // Add selected class to clicked button
+                this.classList.add('selected');
+                
+                const role = this.getAttribute('data-role');
+                roleInput.value = role;
+                
+                // Show/hide appropriate group input
+                if (role === 'admin') {
+                    adminGroupContainer.classList.add('show');
+                    patientGroupContainer.classList.remove('show');
+                    adminGroupInput.required = true;
+                    patientGroupInput.required = false;
+                } else if (role === 'patient') {
+                    adminGroupContainer.classList.remove('show');
+                    patientGroupContainer.classList.add('show');
+                    adminGroupInput.required = false;
+                    patientGroupInput.required = false; // Optional for patients
+                }
+            });
+        });
+
+        signupForm.addEventListener('submit', function(e) {
+            if (!roleInput.value) {
+                e.preventDefault();
+                errorMessage.textContent = 'Please select whether you are an Admin or Patient';
+                errorMessage.classList.add('show');
+                return false;
+            }
+            
+            if (roleInput.value === 'admin' && !adminGroupInput.value.trim()) {
+                e.preventDefault();
+                errorMessage.textContent = 'Please enter the name of the group you are admining';
+                errorMessage.classList.add('show');
+                return false;
+            }
+        });
+    </script>
+</body>
+</html>
+

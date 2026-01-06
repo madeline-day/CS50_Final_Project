@@ -1,0 +1,502 @@
+{% extends "layout.html" %}
+
+{% block title %}Reports - CS50 Final Project{% endblock %}
+
+{% block head %}
+<style>
+    .reports-container {
+        max-width: 1200px;
+        width: 100%;
+        margin: 2rem auto;
+        padding: 2rem;
+    }
+
+    .reports-header {
+        margin-bottom: 2rem;
+    }
+
+    .reports-header h1 {
+        font-size: 2rem;
+        color: #1c1c1c;
+        margin-bottom: 0.5rem;
+    }
+
+    .appointment-card {
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .appointment-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #e0e0e0;
+    }
+
+    .appointment-date {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1c1c1c;
+    }
+
+    .appointment-time {
+        font-size: 0.9rem;
+        color: #666;
+        margin-top: 0.25rem;
+    }
+
+    .appointment-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .detail-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .detail-label {
+        font-size: 0.85rem;
+        color: #666;
+        margin-bottom: 0.25rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .detail-value {
+        font-size: 1rem;
+        color: #1c1c1c;
+        font-weight: 500;
+    }
+
+    .info-section {
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 2px solid #e0e0e0;
+    }
+
+    .info-section:first-of-type {
+        margin-top: 0;
+        padding-top: 0;
+        border-top: none;
+    }
+
+    .info-section h3 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #1c1c1c;
+        margin-bottom: 1rem;
+    }
+
+    .info-section-wrapper {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .info-section-wrapper {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .info-content {
+        background: #f8f8f8;
+        border-radius: 8px;
+        padding: 1rem 1.5rem;
+        line-height: 1.8;
+    }
+
+    .recommendations-box {
+        background: #e8f4f8;
+        border-left: 4px solid #4a6fa5;
+        border-radius: 8px;
+        padding: 1rem 1.5rem;
+        line-height: 1.8;
+    }
+
+    .recommendations-box h4 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #243580;
+        margin-bottom: 0.75rem;
+        margin-top: 0;
+    }
+
+    .info-content ul {
+        margin: 0;
+        padding-left: 1.5rem;
+    }
+
+    .info-content li {
+        margin: 0.5rem 0;
+        color: #1c1c1c;
+    }
+
+    .no-info {
+        color: #999;
+        font-style: italic;
+    }
+
+    .no-appointments {
+        text-align: center;
+        padding: 3rem;
+        color: #666;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="reports-container">
+    <div class="reports-header">
+        <h1>Appointment Reports</h1>
+        {% if viewing_other_user and user_info %}
+            <p style="color: #666;">Viewing reports for: <strong>{{ user_info.name or user_info.username }}</strong></p>
+        {% else %}
+            <p style="color: #666;">View your past appointment history and summaries</p>
+        {% endif %}
+    </div>
+
+    {% if appointments %}
+        {% for appointment in appointments %}
+        <div class="appointment-card">
+            <div class="appointment-header">
+                <div>
+                    <div class="appointment-date">{{ appointment.date }}</div>
+                    <div class="appointment-time">{{ appointment.time }}</div>
+                </div>
+            </div>
+
+            <div class="appointment-details">
+                <div class="detail-item">
+                    <span class="detail-label">Age</span>
+                    <span class="detail-value">{{ appointment.age_years }} years</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Height</span>
+                    <span class="detail-value">{{ appointment.height }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Weight</span>
+                    <span class="detail-value">{{ appointment.weight }}</span>
+                </div>
+            </div>
+
+            {% if appointment.growth_percentile_info and appointment.growth_percentile_info != 'N/A' %}
+            <div class="info-section" style="width: 100%;">
+                <h3>Growth Percentile:</h3>
+                <div style="width: 100%; background: #f8f9fa; border-radius: 8px; padding: 1.5rem; margin-top: 1rem;">
+                    <div style="white-space: pre-line; line-height: 1.8; color: #1c1c1c;">{{ appointment.growth_percentile_info }}</div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="info-section">
+                <h3>Diet:</h3>
+                <div class="info-section-wrapper">
+                    <div class="info-content">
+                        {% if appointment.diet_info %}
+                            {% set diet_lines = appointment.diet_info.split('\n') %}
+                            <ul>
+                                {% for line in diet_lines %}
+                                    {% set cleaned = line.strip() %}
+                                    {% if cleaned %}
+                                        {% if cleaned.startswith('-') or cleaned.startswith('•') %}
+                                            <li>{{ cleaned[1:].strip() }}</li>
+                                        {% elif cleaned.startswith('*') %}
+                                            <li>{{ cleaned[1:].strip() }}</li>
+                                        {% else %}
+                                            <li>{{ cleaned }}</li>
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="no-info">Diet information not yet available. Complete your appointment conversation to see diet summary.</p>
+                        {% endif %}
+                    </div>
+                    <div class="recommendations-box">
+                        <h4>Recommendations:</h4>
+                        {% if appointment.diet_recommendations and appointment.diet_recommendations != 'None' %}
+                            {% set rec_lines = appointment.diet_recommendations.split('\n') %}
+                            <ul>
+                                {% for line in rec_lines %}
+                                    {% set cleaned = line.strip() %}
+                                    {% if cleaned and cleaned != 'None' %}
+                                        {% if cleaned.startswith('-') or cleaned.startswith('•') %}
+                                            <li>{{ cleaned[1:].strip() }}</li>
+                                        {% elif cleaned.startswith('*') %}
+                                            <li>{{ cleaned[1:].strip() }}</li>
+                                        {% else %}
+                                            <li>{{ cleaned }}</li>
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="no-info">None</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h3>Toileting:</h3>
+                <div class="info-section-wrapper">
+                    <div class="info-content">
+                        {% if appointment.toileting_info %}
+                            {% set toileting_lines = appointment.toileting_info.split('\n') %}
+                            <ul>
+                                {% for line in toileting_lines %}
+                                    {% set cleaned = line.strip() %}
+                                    {% if cleaned %}
+                                        {% if cleaned.startswith('-') or cleaned.startswith('•') %}
+                                            <li>{{ cleaned[1:].strip() }}</li>
+                                        {% elif cleaned.startswith('*') %}
+                                            <li>{{ cleaned[1:].strip() }}</li>
+                                        {% else %}
+                                            <li>{{ cleaned }}</li>
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="no-info">Toileting information not yet available.</p>
+                        {% endif %}
+                    </div>
+                    <div class="recommendations-box">
+                        <h4>Recommendations:</h4>
+                        {% if appointment.toileting_recommendations and appointment.toileting_recommendations != 'None' %}
+                            {% set rec_lines = appointment.toileting_recommendations.split('\n') %}
+                            <ul>
+                                {% for line in rec_lines %}
+                                    {% set cleaned = line.strip() %}
+                                    {% if cleaned and cleaned != 'None' %}
+                                        {% if cleaned.startswith('-') or cleaned.startswith('•') %}
+                                            <li>{{ cleaned[1:].strip() }}</li>
+                                        {% elif cleaned.startswith('*') %}
+                                            <li>{{ cleaned[1:].strip() }}</li>
+                                        {% else %}
+                                            <li>{{ cleaned }}</li>
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="no-info">None</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h3>Sleep:</h3>
+                <div class="info-section-wrapper">
+                    <div class="info-content">
+                        {% if appointment.sleep_info %}
+                            {% set sleep_lines = appointment.sleep_info.split('\n') %}
+                            <ul>
+                                {% for line in sleep_lines %}
+                                    {% set cleaned = line.strip() %}
+                                    {% if cleaned %}
+                                        {% if cleaned.startswith('-') or cleaned.startswith('•') %}
+                                            <li>{{ cleaned[1:].strip() }}</li>
+                                        {% elif cleaned.startswith('*') %}
+                                            <li>{{ cleaned[1:].strip() }}</li>
+                                        {% else %}
+                                            <li>{{ cleaned }}</li>
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="no-info">Sleep information not yet available.</p>
+                        {% endif %}
+                    </div>
+                    <div class="recommendations-box">
+                        <h4>Recommendations:</h4>
+                        {% if appointment.sleep_recommendations and appointment.sleep_recommendations != 'None' %}
+                            {% set rec_lines = appointment.sleep_recommendations.split('\n') %}
+                            <ul>
+                                {% for line in rec_lines %}
+                                    {% set cleaned = line.strip() %}
+                                    {% if cleaned and cleaned != 'None' %}
+                                        {% if cleaned.startswith('-') or cleaned.startswith('•') %}
+                                            <li>{{ cleaned[1:].strip() }}</li>
+                                        {% elif cleaned.startswith('*') %}
+                                            <li>{{ cleaned[1:].strip() }}</li>
+                                        {% else %}
+                                            <li>{{ cleaned }}</li>
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="no-info">None</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h3>Development/Behavior:</h3>
+                <div class="info-section-wrapper">
+                    <div class="info-content">
+                        {% if appointment.development_behavior_info %}
+                            {% set dev_lines = appointment.development_behavior_info.split('\n') %}
+                            <ul>
+                                {% for line in dev_lines %}
+                                    {% set cleaned = line.strip() %}
+                                    {% if cleaned %}
+                                        {% if cleaned.startswith('-') or cleaned.startswith('•') %}
+                                            <li>{{ cleaned[1:].strip() }}</li>
+                                        {% elif cleaned.startswith('*') %}
+                                            <li>{{ cleaned[1:].strip() }}</li>
+                                        {% else %}
+                                            <li>{{ cleaned }}</li>
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="no-info">Development/Behavior information not yet available.</p>
+                        {% endif %}
+                    </div>
+                    <div class="recommendations-box">
+                        <h4>Recommendations:</h4>
+                        {% if appointment.development_behavior_recommendations and appointment.development_behavior_recommendations != 'None' %}
+                            {% set rec_lines = appointment.development_behavior_recommendations.split('\n') %}
+                            <ul>
+                                {% for line in rec_lines %}
+                                    {% set cleaned = line.strip() %}
+                                    {% if cleaned and cleaned != 'None' %}
+                                        {% if cleaned.startswith('-') or cleaned.startswith('•') %}
+                                            <li>{{ cleaned[1:].strip() }}</li>
+                                        {% elif cleaned.startswith('*') %}
+                                            <li>{{ cleaned[1:].strip() }}</li>
+                                        {% else %}
+                                            <li>{{ cleaned }}</li>
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="no-info">None</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h3>Social:</h3>
+                <div class="info-section-wrapper">
+                    <div class="info-content">
+                        {% if appointment.social_info %}
+                            {% set social_lines = appointment.social_info.split('\n') %}
+                            <ul>
+                                {% for line in social_lines %}
+                                    {% set cleaned = line.strip() %}
+                                    {% if cleaned %}
+                                        {% if cleaned.startswith('-') or cleaned.startswith('•') %}
+                                            <li>{{ cleaned[1:].strip() }}</li>
+                                        {% elif cleaned.startswith('*') %}
+                                            <li>{{ cleaned[1:].strip() }}</li>
+                                        {% else %}
+                                            <li>{{ cleaned }}</li>
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="no-info">Social information not yet available.</p>
+                        {% endif %}
+                    </div>
+                    <div class="recommendations-box">
+                        <h4>Recommendations:</h4>
+                        {% if appointment.social_recommendations and appointment.social_recommendations != 'None' %}
+                            {% set rec_lines = appointment.social_recommendations.split('\n') %}
+                            <ul>
+                                {% for line in rec_lines %}
+                                    {% set cleaned = line.strip() %}
+                                    {% if cleaned and cleaned != 'None' %}
+                                        {% if cleaned.startswith('-') or cleaned.startswith('•') %}
+                                            <li>{{ cleaned[1:].strip() }}</li>
+                                        {% elif cleaned.startswith('*') %}
+                                            <li>{{ cleaned[1:].strip() }}</li>
+                                        {% else %}
+                                            <li>{{ cleaned }}</li>
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="no-info">None</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h3>Concerns:</h3>
+                <div class="info-section-wrapper">
+                    <div class="info-content">
+                        {% if appointment.extracted_concerns %}
+                            {% set concerns_lines = appointment.extracted_concerns.split('\n') %}
+                            <ul>
+                                {% for line in concerns_lines %}
+                                    {% set cleaned = line.strip() %}
+                                    {% if cleaned %}
+                                        {% if cleaned.startswith('-') or cleaned.startswith('•') %}
+                                            <li>{{ cleaned[1:].strip() }}</li>
+                                        {% elif cleaned.startswith('*') %}
+                                            <li>{{ cleaned[1:].strip() }}</li>
+                                        {% else %}
+                                            <li>{{ cleaned }}</li>
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="no-info">Additional concerns not yet available.</p>
+                        {% endif %}
+                    </div>
+                    <div class="recommendations-box">
+                        <h4>Recommendations:</h4>
+                        {% if appointment.concerns_recommendations and appointment.concerns_recommendations != 'None' %}
+                            {% set rec_lines = appointment.concerns_recommendations.split('\n') %}
+                            <ul>
+                                {% for line in rec_lines %}
+                                    {% set cleaned = line.strip() %}
+                                    {% if cleaned and cleaned != 'None' %}
+                                        {% if cleaned.startswith('-') or cleaned.startswith('•') %}
+                                            <li>{{ cleaned[1:].strip() }}</li>
+                                        {% elif cleaned.startswith('*') %}
+                                            <li>{{ cleaned[1:].strip() }}</li>
+                                        {% else %}
+                                            <li>{{ cleaned }}</li>
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="no-info">None</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="no-appointments">
+            <p>No appointments found. <a href="{{ url_for('appointment_page') }}">Start a new appointment</a> to begin.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
